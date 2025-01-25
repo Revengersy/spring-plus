@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.ServerException;
 import org.example.expert.domain.user.enums.UserRole;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,23 +35,25 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long userId, String email, UserRole userRole) {
+    // Modified method signature to include nickname
+    public String createToken(Long userId, String email, UserRole userRole, String nickname) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(String.valueOf(userId))
                         .claim("email", email)
-                        .claim("userRole", userRole)
+                        .claim("userRole", userRole.name())
+                        .claim("nickname", nickname) // Added nickname to claims
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-                        .setIssuedAt(date) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
+                        .setIssuedAt(date) // Issued at
+                        .signWith(key, signatureAlgorithm) // Signing algorithm
                         .compact();
     }
 
     public String substringToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
+            return tokenValue.substring(BEARER_PREFIX.length());
         }
         throw new ServerException("Not Found Token");
     }
@@ -61,5 +64,17 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public AuthUser getAuthUser(String token) {
+        Claims claims = extractClaims(token);
+
+        Long userId = Long.parseLong(claims.getSubject());
+        String email = claims.get("email", String.class);
+        String userRoleStr = claims.get("userRole", String.class);
+        UserRole userRole = UserRole.valueOf(userRoleStr);
+        String nickname = claims.get("nickname", String.class);
+
+        return new AuthUser(userId, email, userRole, nickname);
     }
 }

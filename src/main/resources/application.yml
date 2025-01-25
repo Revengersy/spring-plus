@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: spring-plus
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring-plus
+    username: root
+    password: tmvkfmxk321!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+
+logging:
+  level:
+    root: INFO
+
+jwt:
+  secret:
+    key: I47PW4GYmNXlx/ydXiSXZTyYirkvSZawfgyOLzt0jbc=
+  expiration: 86400000  # 24시간

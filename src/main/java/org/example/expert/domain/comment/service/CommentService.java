@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,7 +44,7 @@ public class CommentService {
         return new CommentSaveResponse(
                 savedComment.getId(),
                 savedComment.getContents(),
-                new UserResponse(user.getId(), user.getEmail())
+                new UserResponse(user.getId(), user.getEmail(), user.getNickname())
         );
     }
 
@@ -52,11 +53,11 @@ public class CommentService {
 
         List<CommentResponse> dtoList = new ArrayList<>();
         for (Comment comment : commentList) {
-            User user = comment.getUser();
+            User user = comment.getUser(); // 이미 User가 로딩되어 있음
             CommentResponse dto = new CommentResponse(
                     comment.getId(),
                     comment.getContents(),
-                    new UserResponse(user.getId(), user.getEmail())
+                    new UserResponse(user.getId(), user.getEmail(), user.getNickname())
             );
             dtoList.add(dto);
         }

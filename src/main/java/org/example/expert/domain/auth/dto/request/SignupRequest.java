@@ -17,4 +17,8 @@ public class SignupRequest {
     private String password;
     @NotBlank
     private String userRole;
+
+//     added nickname field
+    @NotBlank
+    private String nickname;
 }

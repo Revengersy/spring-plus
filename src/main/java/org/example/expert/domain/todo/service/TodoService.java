@@ -17,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,6 +28,7 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
 
+    @Transactional // 클래스 단위의 readOnly 설정을 덮어 씀
     public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
         User user = User.fromAuthUser(authUser);
 
@@ -43,21 +47,20 @@ public class TodoService {
                 savedTodo.getTitle(),
                 savedTodo.getContents(),
                 weather,
-                new UserResponse(user.getId(), user.getEmail())
+                new UserResponse(user.getId(), user.getEmail(), user.getNickname())
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) { // 파라미터 추가됨
         Pageable pageable = PageRequest.of(page - 1, size);
-
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        Page<Todo> todos = todoRepository.findTodosByOptionalFilters(weather, startDate, endDate, pageable); // 수정됨
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
                 todo.getTitle(),
                 todo.getContents(),
                 todo.getWeather(),
-                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail()),
+                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail(), todo.getUser().getNickname()),
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
         ));
@@ -74,7 +77,7 @@ public class TodoService {
                 todo.getTitle(),
                 todo.getContents(),
                 todo.getWeather(),
-                new UserResponse(user.getId(), user.getEmail()),
+                new UserResponse(user.getId(), user.getEmail(), user.getNickname()),
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
         );
