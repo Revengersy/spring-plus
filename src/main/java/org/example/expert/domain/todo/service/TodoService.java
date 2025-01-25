@@ -19,12 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true) // todo lv1, 이게 있을 때와 없을 때 차이 정리할 것
 public class TodoService {
 
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
 
+    @Transactional // lv1
     public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
         User user = User.fromAuthUser(authUser);
 
@@ -47,10 +48,17 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        // Lv1: weather
+        Page<Todo> todos;
+        if (weather.isEmpty()){
+            todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        } else {
+            todos = todoRepository.findAllByWeatherOrderByModifiedAtDesc(pageable,weather);
+        }
+
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
