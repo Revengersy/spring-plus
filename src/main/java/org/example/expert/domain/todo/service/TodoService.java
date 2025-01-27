@@ -2,7 +2,7 @@ package org.example.expert.domain.todo.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.expert.client.WeatherClient;
-import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.security.UserDetailsImpl;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
@@ -19,14 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true) // todo lv1, 이게 있을 때와 없을 때 차이 정리할 것
 public class TodoService {
 
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
 
-    public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+    @Transactional // lv1
+    public TodoSaveResponse saveTodo(UserDetailsImpl authUser, TodoSaveRequest todoSaveRequest) {
+        User user = authUser.getUser();
 
         String weather = weatherClient.getTodayWeather();
 
@@ -47,10 +48,17 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        // Lv1: weather
+        Page<Todo> todos;
+        if (weather.isEmpty()) {
+            todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        } else {
+            todos = todoRepository.findAllByWeatherOrderByModifiedAtDesc(pageable, weather);
+        }
+
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
@@ -64,10 +72,11 @@ public class TodoService {
     }
 
     public TodoResponse getTodo(long todoId) {
-        Todo todo = todoRepository.findByIdWithUser(todoId)
+        Todo todo = todoRepository.findByIdWithUserDsl(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
         User user = todo.getUser();
+
 
         return new TodoResponse(
                 todo.getId(),

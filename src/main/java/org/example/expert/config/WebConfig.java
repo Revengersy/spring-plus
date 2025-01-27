@@ -1,3 +1,4 @@
+/* Lv2
 package org.example.expert.config;
 
 import lombok.RequiredArgsConstructor;
@@ -17,3 +18,4 @@ public class WebConfig implements WebMvcConfigurer {
         resolvers.add(new AuthUserArgumentResolver());
     }
 }
+*/

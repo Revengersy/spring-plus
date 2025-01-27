@@ -1,4 +1,8 @@
+
+/* Lv2: Seceruty 전환을 위한 주석 처리
 package org.example.expert.config;
+
+
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.expert.domain.auth.exception.AuthException;
@@ -39,8 +43,10 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         // JwtFilter 에서 set 한 userId, email, userRole 값을 가져옴
         Long userId = (Long) request.getAttribute("userId");
         String email = (String) request.getAttribute("email");
+        String nickname = (String) request.getAttribute("nickname"); // Lv1 닉네임 추가
         UserRole userRole = UserRole.of((String) request.getAttribute("userRole"));
 
-        return new AuthUser(userId, email, userRole);
+        return new AuthUser(userId, email, nickname, userRole); // Lv1 닉네임 추가
     }
 }
+*/
