@@ -2,7 +2,7 @@ package org.example.expert.domain.todo.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.expert.client.WeatherClient;
-import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.security.UserDetailsImpl;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
@@ -26,8 +26,8 @@ public class TodoService {
     private final WeatherClient weatherClient;
 
     @Transactional // lv1
-    public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+    public TodoSaveResponse saveTodo(UserDetailsImpl authUser, TodoSaveRequest todoSaveRequest) {
+        User user = authUser.getUser();
 
         String weather = weatherClient.getTodayWeather();
 
@@ -53,10 +53,10 @@ public class TodoService {
 
         // Lv1: weather
         Page<Todo> todos;
-        if (weather.isEmpty()){
+        if (weather.isEmpty()) {
             todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
         } else {
-            todos = todoRepository.findAllByWeatherOrderByModifiedAtDesc(pageable,weather);
+            todos = todoRepository.findAllByWeatherOrderByModifiedAtDesc(pageable, weather);
         }
 
 
@@ -72,10 +72,11 @@ public class TodoService {
     }
 
     public TodoResponse getTodo(long todoId) {
-        Todo todo = todoRepository.findByIdWithUser(todoId)
+        Todo todo = todoRepository.findByIdWithUserDsl(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
         User user = todo.getUser();
+
 
         return new TodoResponse(
                 todo.getId(),

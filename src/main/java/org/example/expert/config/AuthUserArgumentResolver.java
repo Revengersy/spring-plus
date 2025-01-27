@@ -1,4 +1,8 @@
+
+/* Lv2: Seceruty 전환을 위한 주석 처리
 package org.example.expert.config;
+
+
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.expert.domain.auth.exception.AuthException;
@@ -45,3 +49,4 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         return new AuthUser(userId, email, nickname, userRole); // Lv1 닉네임 추가
     }
 }
+*/

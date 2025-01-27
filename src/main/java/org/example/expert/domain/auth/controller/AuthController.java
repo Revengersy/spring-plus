@@ -22,8 +22,9 @@ public class AuthController {
         return authService.signup(signupRequest);
     }
 
-    @PostMapping("/auth/signin")
-    public SigninResponse signin(@Valid @RequestBody SigninRequest signinRequest) {
-        return authService.signin(signinRequest);
-    }
+//    Lv2 : Security 적용 위해
+//    @PostMapping("/auth/signin")
+//    public SigninResponse signin(@Valid @RequestBody SigninRequest signinRequest) {
+//        return authService.signin(signinRequest);
+//    }
 }

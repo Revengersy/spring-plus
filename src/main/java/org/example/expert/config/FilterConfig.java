@@ -1,3 +1,4 @@
+/* Lv2: Security 기능을 위한 주석 처리
 package org.example.expert.config;
 
 import lombok.RequiredArgsConstructor;
@@ -20,3 +21,4 @@ public class FilterConfig {
         return registrationBean;
     }
 }
+*/
